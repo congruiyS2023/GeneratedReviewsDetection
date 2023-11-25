@@ -20,7 +20,7 @@ args = parser.parse_args()
 
 print('Loading Model..')
 backbone_type = args.model_version
-device = 'cpu'
+device = 'cuda' if torch.cuda.is_available() else 'cpu'
 j=args.j
 weights_path = args.weights_path
 dataset = FakeReviewsDataset(args.data_path, backbone_type)
