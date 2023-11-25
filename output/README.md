@@ -1,0 +1,1 @@
+Directory for model weights. This directory is not tracked by git.
