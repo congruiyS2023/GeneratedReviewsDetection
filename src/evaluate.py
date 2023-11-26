@@ -62,10 +62,10 @@ def evaluate_gpt(j = j, save_preds = args.save_preds):
         for data_test in test_dataloader:
             X_test = data_test['input']['input_ids'].to(device)
             y_test = data_test['label'].numpy()
-            y_pred_test = F.sigmoid(model(X_test).unsqueeze(0)).squeeze(0)#.detach().cpu().numpy()
-            y_pred_test = np.where(y_pred_test > j, 1, 0)
+            y_pred_proba = F.sigmoid(model(X_test).unsqueeze(0)).squeeze(0).detach().cpu().numpy()
+            y_pred_test = np.where(y_pred_proba > 0.5, 1, 0)
             predictions.append(y_pred_test)
-            true.append(y_test)    
+            true.append(y_test)
     metrics(predictions, true)
     if backbone_type == 'EleutherAI/gpt-neo-125M':
         save_type = "gpt-neo-125M"
