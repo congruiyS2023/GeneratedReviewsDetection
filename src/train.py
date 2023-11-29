@@ -1,5 +1,5 @@
-import torch 
-import torch.nn as nn 
+import torch
+import torch.nn as nn
 import torch.nn.functional as F
 from torch.optim.lr_scheduler import StepLR
 from dataset import FakeReviewsDataset
@@ -28,10 +28,11 @@ def load_data(train, path = "./data/"):
         test_dataloader = DataLoader(test_data, 1)
         return test_dataloader
 
-# model 
+# model
 backbone_type = args.model_version
 
-if backbone_type == 'EleutherAI/gpt-neo-125M':
+if (backbone_type == 'EleutherAI/gpt-neo-125M' or
+        backbone_type == 'Langboat/mengzi-gpt-neo-base'):
     last_hidden_size = 768
     backbone = GPTNeoForSequenceClassification.from_pretrained(backbone_type)
     model = GPTNeo(backbone, last_hidden_size)
@@ -40,13 +41,13 @@ if backbone_type == 'EleutherAI/gpt-neo-125M':
 if backbone_type == 'gpt2-large':
     last_hidden_size = 1280
     backbone = GPT2Model.from_pretrained(backbone_type)
-    model = GPT2(backbone, last_hidden_size) 
+    model = GPT2(backbone, last_hidden_size)
     backbone_type_save = backbone_type
 
 if backbone_type == 'gpt2':
     last_hidden_size = 768
     backbone = GPT2Model.from_pretrained(backbone_type)
-    model = GPT2(backbone, last_hidden_size) 
+    model = GPT2(backbone, last_hidden_size)
     backbone_type_save = backbone_type
 
 
@@ -86,8 +87,8 @@ def train_gpt(EPOCHS=100, lr = args.lr):
             loss = criterion(y_pred, y)
             loss.backward()
             optimiser.step()
-        
-        model.eval()        
+
+        model.eval()
         with torch.no_grad():
             predictions = []
             probas = []
@@ -101,7 +102,7 @@ def train_gpt(EPOCHS=100, lr = args.lr):
                 predictions.append(y_pred_test)
                 probas.append(y_pred_proba)
                 true.append(y_test)
-            
+
             true = np.array(true)
             true = true.reshape(-1)
             probas = np.array(probas)
@@ -119,7 +120,7 @@ def train_gpt(EPOCHS=100, lr = args.lr):
 
             print(f'Prediction metrics at Youden {round(j, 4)}: ')
             probas = np.array(probas)
-            
+
             predictions_you = np.where(probas >= j, 1, 0)
             accuracy_you = accuracy_score(true, predictions_you)
             precision_you = precision_score(true, predictions_you)
@@ -134,14 +135,14 @@ def train_gpt(EPOCHS=100, lr = args.lr):
                 count = 0
                 print('Found best accuracy. Saving to disk.')
                 torch.save(model.state_dict(), f'./output/{backbone_type_save}_{epoch}.pt')
-                best = accuracy_you 
-            
+                best = accuracy_you
+
         if count == 10:
             print('Early stopping at epoch: ', epoch, '.')
             break
-        
+
         scheduler.step()
         print()
-    
+
 if __name__ == '__main__':
     train_gpt(1000)

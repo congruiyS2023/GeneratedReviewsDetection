@@ -1,13 +1,17 @@
 from torch.utils.data import Dataset
 import pandas as pd 
 from transformers import GPT2Tokenizer
+import sentencepiece as spm
 
 class FakeReviewsDataset(Dataset):
     def __init__(self, file, model:str):
         super().__init__()
         self.file = file 
         self.data = pd.read_csv(self.file)
-        self.tokenizer = GPT2Tokenizer.from_pretrained(model)
+        if model == 'Langboat/mengzi-gpt-neo-base':
+            self.tokenizer = spm.SentencePieceProcessor(model_file="../model/mengzi_gpt.model")
+        else:
+            self.tokenizer = GPT2Tokenizer.from_pretrained(model)
 
     def __len__(self):
         return self.data.shape[0]
