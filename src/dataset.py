@@ -1,6 +1,7 @@
 from torch.utils.data import Dataset
 import pandas as pd 
 from transformers import GPT2Tokenizer
+import torch
 import sentencepiece as spm
 import os
 
@@ -21,7 +22,10 @@ class FakeReviewsDataset(Dataset):
         current = self.data.iloc[idx]
         text = current.text
         label = current.label
-        encoded_input = self.tokenizer(text, return_tensors='pt')
+        if isinstance(self.tokenizer, spm.SentencePieceProcessor):
+            encoded_input = torch.tensor(self.tokenizer.encode(text))
+        else:
+            encoded_input = self.tokenizer(text, return_tensors='pt', max_length=2048, truncation=True)
         return {'input':encoded_input, 'label':label}
     
 
