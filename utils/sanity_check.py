@@ -13,7 +13,7 @@ def sanity_check(data: pd.DataFrame) -> (int, pd.DataFrame):
 
 
 def main():
-    file = os.path.join('./Data/train.csv')
+    file = os.path.join('./data/train.csv')
     data = pd.read_csv(file)
     invalid_rows, data = sanity_check(data)
     print(f"Cleared {invalid_rows} non-string reviews")
